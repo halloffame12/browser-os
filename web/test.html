@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BrowserOS Debug Test</title>
+</head>
+<body>
+  <h1>BrowserOS Debug Test</h1>
+  <div id="output"></div>
+  
+  <script>
+    async function test() {
+      const output = document.getElementById("output");
+      
+      function log(msg) {
+        console.log(msg);
+        output.innerHTML += msg + "<br>";
+      }
+      
+      try {
+        log("1. Test started");
+        
+        // Try to import the kernel
+        log("2. Importing kernel module...");
+        const mod = await import("./browser_os.js");
+        log("3. Kernel module imported successfully");
+        log("4. Module has: " + Object.keys(mod).join(", "));
+        
+        // Check if boot exists
+        if (typeof mod.boot === "function") {
+          log("5. boot() function found");
+        } else {
+          log("5. ERROR: boot() function NOT found!");
+        }
+        
+        // Check if init exists
+        if (typeof mod.default === "function") {
+          log("6. init() function found");
+        } else {
+          log("6. ERROR: init() function NOT found!");
+        }
+        
+        // Try to initialize
+        log("7. Calling init()...");
+        await mod.default();
+        log("8. init() completed successfully");
+        
+        // Try to get uptime
+        log("9. Calling get_uptime()...");
+        const uptime = mod.get_uptime();
+        log("10. get_uptime() returned: " + uptime);
+        
+        // Try boot
+        log("11. Calling boot(0)...");
+        const bootMsg = mod.boot(0);
+        log("12. boot() returned: " + bootMsg);
+        
+        log("13. ALL TESTS PASSED!");
+        
+      } catch (e) {
+        log("ERROR: " + e.message);
+        log("Stack: " + e.stack);
+      }
+    }
+    
+    test();
+  </script>
+</body>
+</html>

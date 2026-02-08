@@ -1,0 +1,15 @@
+{
+  "name": "browser_os",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "browser_os_bg.wasm",
+    "browser_os.js",
+    "browser_os.d.ts"
+  ],
+  "main": "browser_os.js",
+  "types": "browser_os.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

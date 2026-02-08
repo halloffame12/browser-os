@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BrowserOS Minimal Test</title>
+  <style>
+    body { font-family: monospace; background: #000; color: #0f0; }
+    #log { white-space: pre; padding: 20px; }
+    .error { color: #f00; }
+    .success { color: #0f0; }
+  </style>
+</head>
+<body>
+  <h1>BrowserOS Minimal Test</h1>
+  <div id="log"></div>
+  
+  <script type="module">
+    const logDiv = document.getElementById("log");
+    
+    function log(msg, isError = false) {
+      const line = document.createElement("div");
+      line.className = isError ? "error" : "success";
+      line.textContent = msg;
+      logDiv.appendChild(line);
+      console.log(msg);
+    }
+    
+    async function runTest() {
+      try {
+        log("Starting test...");
+        
+        // Step 1: Check if files exist by attempting to fetch
+        log("\n--- Testing WASM File ---");
+        const wasmResp = await fetch("./browser_os_bg.wasm");
+        log(`WASM file status: ${wasmResp.status}`);
+        
+        // Step 2: Import the module
+        log("\n--- Importing Module ---");
+        const module = await import("./browser_os.js");
+        log("Module imported successfully");
+        
+        // Step 3: List what we got
+        log("\n--- Module Exports ---");
+        const exports = Object.keys(module);
+        log(`Total exports: ${exports.length}`);
+        exports.slice(0, 20).forEach(e => log(`  - ${e}`));
+        
+        // Step 4: Check init function
+        log("\n--- Init Function ---");
+        const initFunc = module.default;
+        log(`Init function type: ${typeof initFunc}`);
+        log(`Init is callable: ${typeof initFunc === "function"}`);
+        
+        // Step 5: Call init
+        log("\n--- Calling Init ---");
+        const initResult = await initFunc();
+        log("Init completed successfully");
+        log(`Init returned: ${typeof initResult}`);
+        
+        // Step 6: Check for boot after init
+        log("\n--- Boot Function ---");
+        log(`module.boot type: ${typeof module.boot}`);
+        log(`module.boot exists: ${!!module.boot}`);
+        
+        if (typeof module.boot === "function") {
+          // Step 7: Try calling boot
+          log("\n--- Calling Boot ---");
+          try {
+            const bootRes = module.boot(0);
+            log(`Boot returned: ${typeof bootRes}`);
+            log(`Boot message length: ${bootRes.length}`);
+            log(`Boot message:\n${bootRes}`);
+          } catch (e) {
+            log(`Boot error: ${e.message}`, true);
+            log(`Boot error stack: ${e.stack}`, true);
+          }
+        } else {
+          log("ERROR: boot function not found!", true);
+        }
+        
+        log("\n✓ Test completed");
+        
+      } catch (e) {
+        log(`\nFATAL ERROR: ${e.message}`, true);
+        log(`Stack: ${e.stack}`, true);
+      }
+    }
+    
+    runTest();
+  </script>
+</body>
+</html>
