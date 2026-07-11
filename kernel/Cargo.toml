@@ -1,10 +1,29 @@
 [package]
 name = "browser_os"
-version = "0.1.0"
+version = "0.3.0"
 edition = "2021"
+description = "BrowserOS capability-secure kernel for wasm32-unknown-unknown"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
+# wasm-bindgen with default-features=false enables no_std compilation.
+# The generated glue code marshals u32/u64/String across the JS↔WASM boundary.
+# If your wasm-pack version requires the "std" feature, add: features = ["std"]
 wasm-bindgen = "0.2"
+
+# no_std note: This crate is compiled with #![no_std]. All heap allocations
+# go through the `alloc` crate (Vec, String, BTreeMap). The BTreeMap is used
+# instead of HashMap to avoid the `hashbrown` dependency. If hash-based maps
+# are preferred for performance, add:
+#   hashbrown = "0.14"
+# and replace `use alloc::collections::BTreeMap` with `use hashbrown::HashMap`.
+
+[profile.release]
+# Optimize for small WASM binary size
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

@@ -1,0 +1,5 @@
+[target.x86_64-pc-windows-msvc]
+linker = "C:\\Users\\SUMIT CHAUHAN\\scoop\\apps\\llvm\\current\\bin\\lld-link.exe"
+
+[target.wasm32-unknown-unknown]
+# WASM uses its own native linker; no need to override
